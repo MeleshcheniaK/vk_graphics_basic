@@ -48,5 +48,8 @@ int main()
   if (etna::is_initilized())
     etna::shutdown();
 
+  if (etna::is_initilized())
+    etna::shutdown();
+
   return 0;
 }
