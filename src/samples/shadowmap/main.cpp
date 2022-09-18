@@ -48,6 +48,7 @@ int main()
   if (etna::is_initilized())
     etna::shutdown();
 
+  app = {};
   if (etna::is_initilized())
     etna::shutdown();
 
