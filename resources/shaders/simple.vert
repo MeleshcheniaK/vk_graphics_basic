@@ -39,7 +39,7 @@ void main(void)
     float timer = params.mTimer;
     vOut.wPos.x *= abs(sin(timer)) / 4 + 0.75;
     vOut.wPos.y *= abs(sin(timer)) / 4 + 0.75;
-    vOut.wPos.z *= abs(sin(timer) + cos(timer)) / 4 + 0.75;
+    vOut.wPos.z *= abs(cos(timer)) / 4 + 0.75;
 
     gl_Position   = params.mProjView * vec4(vOut.wPos, 1.0);
 }
