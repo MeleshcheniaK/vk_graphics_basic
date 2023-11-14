@@ -70,13 +70,13 @@ void ImGuiRender::InitImGui()
     begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     VK_CHECK_RESULT(vkBeginCommandBuffer(cmdBuf, &begin_info));
 
-    ImGui_ImplVulkan_CreateFontsTexture(cmdBuf);
+    ImGui_ImplVulkan_CreateFontsTexture();
 
     vkEndCommandBuffer(cmdBuf);
 
     vk_utils::executeCommandBufferNow(cmdBuf, m_queue, m_device);
 
-    ImGui_ImplVulkan_DestroyFontUploadObjects();
+    ImGui_ImplVulkan_DestroyFontsTexture();
   }
 }
 
