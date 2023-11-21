@@ -16,7 +16,7 @@ void SimpleShadowmapRender::InitVulkan(const char** a_instanceExtensions, uint32
   }
 
   SetupDeviceExtensions();
-  
+  m_enabledDeviceFeatures.setGeometryShader(vk::True);
   etna::initialize(etna::InitParams
     {
       .applicationName = "ShadowmapSample",
