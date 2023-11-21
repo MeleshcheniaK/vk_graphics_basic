@@ -46,7 +46,10 @@ public:
 private:
   etna::GlobalContext* m_context;
   etna::Image mainViewDepth;
-  etna::Image shadowMap;
+  etna::Image fillingMatrix;
+  etna::Image gPosition;
+  etna::Image gNormal;
+  etna::Image gAlbedo;
   etna::Sampler defaultSampler;
   etna::Buffer constants;
 
@@ -75,8 +78,9 @@ private:
   UniformParams m_uniforms {};
   void* m_uboMappedMem = nullptr;
 
-  etna::GraphicsPipeline m_basicForwardPipeline {};
   etna::GraphicsPipeline m_shadowPipeline {};
+  etna::GraphicsPipeline m_gBufferPipeline {};
+  etna::GraphicsPipeline m_lightningPipeline{};
 
   std::shared_ptr<vk_utils::DescriptorMaker> m_pBindings = nullptr;
   
@@ -136,7 +140,6 @@ private:
   void BuildCommandBufferSimple(VkCommandBuffer a_cmdBuff, VkImage a_targetImage, VkImageView a_targetImageView);
 
   void DrawSceneCmd(VkCommandBuffer a_cmdBuff, const float4x4& a_wvp);
-
   void loadShaders();
 
   void SetupSimplePipeline();
