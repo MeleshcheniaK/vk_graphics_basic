@@ -1,0 +1,55 @@
+#version 430
+
+layout (rgba8, binding = 0) uniform image2D inputImg;
+layout (rgba8, binding = 1) uniform image2D outputImg;
+
+shared vec4 outputPixel[11][11];
+
+const float pi = 3.1416;
+const float sigma_coef_1 = 25;
+const float sigma_coef_2 = 0.05;
+
+float gaussianBlur[11];
+
+void gaussianVector()
+{
+    for (int i = -5; i <= 5; ++i) {
+        gaussianBlur[i + 5] = exp(-1 * (i * i) / sigma_coef_1) / sqrt(pi * sigma_coef_2);
+    }
+}
+
+void main()
+{
+    ivec2 localCoords = ivec2(gl_LocalInvocationID.xy);
+
+    gaussianVector();
+
+    int x = int(gl_WorkGroupID.x + localCoords - 5);
+    x = max(0, x);
+    x = min(x, imageSize(inputImg).x - 1);
+
+    int y = int(gl_WorkGroupID.y + localCoords - 5);
+    y = max(0, y);
+    y = min(y, imageSize(inputImg).y - 1);
+
+    outputPixel[localCoords.x][localCoords.y] = imageLoad(inputImg, ivec2(x, y));
+
+    vec4 pixel = vec4(0.0);
+    for (int x = 0; x < gl_WorkGroupSize.x; ++x)
+    {
+        pixel += outputPixel[x][localCoords.y] * gaussianBlur[x];
+    }
+
+    outputPixel[localCoords.x][localCoords.y] = pixel;
+
+    barrier();
+
+    pixel = vec4(0.0);
+
+    for (int y = 0; y < gl_WorkGroupSize.y; ++y)
+    {
+        pixel += outputPixel[localCoords.x][y] * gaussianBlur[y];
+    }
+
+    imageStore(outputImg, ivec2(gl_WorkGroupID.xy), pixel);
+}

@@ -47,6 +47,8 @@ private:
   etna::GlobalContext* m_context;
   etna::Image mainViewDepth;
   etna::Image shadowMap;
+  etna::Image gaussMap;
+  etna::Image finalColor;
   etna::Sampler defaultSampler;
   etna::Buffer constants;
 
@@ -77,6 +79,7 @@ private:
 
   etna::GraphicsPipeline m_basicForwardPipeline {};
   etna::GraphicsPipeline m_shadowPipeline {};
+  etna::ComputePipeline m_gaussPipeline{};
 
   std::shared_ptr<vk_utils::DescriptorMaker> m_pBindings = nullptr;
   
