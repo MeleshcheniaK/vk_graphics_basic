@@ -1,4 +1,6 @@
-#version 430
+#version 450
+
+layout (local_size_x = 11, local_size_y = 11) in;
 
 layout (rgba8, binding = 0) uniform image2D inputImg;
 layout (rgba8, binding = 1) uniform image2D outputImg;
@@ -6,9 +8,8 @@ layout (rgba8, binding = 1) uniform image2D outputImg;
 shared vec4 outputPixel[11][11];
 
 const float pi = 3.1416;
-const float sigma_coef_1 = 25;
-const float sigma_coef_2 = 0.05;
-
+const float sigma_coef_1 = 5;
+const float sigma_coef_2 = 5;
 float gaussianBlur[11];
 
 void gaussianVector()
@@ -20,36 +21,40 @@ void gaussianVector()
 
 void main()
 {
-    ivec2 localCoords = ivec2(gl_LocalInvocationID.xy);
+    ivec2 local = ivec2(gl_LocalInvocationID.xy);
 
     gaussianVector();
+    barrier();
 
-    int x = int(gl_WorkGroupID.x + localCoords - 5);
+    int x = int(int(gl_WorkGroupID.x) + int(local.x) - 10);
     x = max(0, x);
-    x = min(x, imageSize(inputImg).x - 1);
+    x = min(x, int(imageSize(inputImg).x) - 1);
 
-    int y = int(gl_WorkGroupID.y + localCoords - 5);
+    int y = int(int(gl_WorkGroupID.y) + int(local.y) - 10);
     y = max(0, y);
-    y = min(y, imageSize(inputImg).y - 1);
+    y = min(y, int(imageSize(inputImg).y) - 1);
 
-    outputPixel[localCoords.x][localCoords.y] = imageLoad(inputImg, ivec2(x, y));
-
-    vec4 pixel = vec4(0.0);
-    for (int x = 0; x < gl_WorkGroupSize.x; ++x)
-    {
-        pixel += outputPixel[x][localCoords.y] * gaussianBlur[x];
-    }
-
-    outputPixel[localCoords.x][localCoords.y] = pixel;
+    outputPixel[local.x][local.y] = imageLoad(inputImg, ivec2(x, y));
 
     barrier();
 
-    pixel = vec4(0.0);
+    vec4 pixel = vec4(0.0);
+    if (local.x == 0) {
+        for (int i = 0; i < 11; ++i)
+        {
+            pixel += outputPixel[i][local.y] * gaussianBlur[i];
+        }
+        outputPixel[local.x][local.y] = pixel;
+        barrier();
 
-    for (int y = 0; y < gl_WorkGroupSize.y; ++y)
-    {
-        pixel += outputPixel[localCoords.x][y] * gaussianBlur[y];
+        if (local.y == 0) {
+            pixel = vec4(0.0);
+            for (int j = 0; j < 11; ++j)
+            {
+                pixel += outputPixel[local.x][j] * gaussianBlur[j];
+            }
+            // barrier();
+            imageStore(outputImg, ivec2(gl_WorkGroupID.xy), pixel);
+        }
     }
-
-    imageStore(outputImg, ivec2(gl_WorkGroupID.xy), pixel);
 }
